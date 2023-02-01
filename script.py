@@ -1,4 +1,5 @@
 import cv2
+import keyboard
 from onvif import ONVIFCamera
 from rtsp_link_patterns import get_link
 
@@ -34,17 +35,39 @@ def get_stream(link):
     cv2.destroyAllWindows()
 
 
-if __name__ == '__main__':
-    IP = input('Введите IP адрес: ')
+def data_input():
+
+    IP = input('Введите IP-адрес: ')
     username = input('Введите имя пользователя: ')
     password = input('Введите пароль: ')
-    path_to_wsdl = 'venv\Lib\site-packages\wsdl'
 
-    address_list = IP.split(':')     # для проверки введенного IP-адреса: с портом или без
-    rtsp_links = get_links_by_producer(address_list, username, password, path_to_wsdl)
+    return IP, username, password
 
-    if isinstance(rtsp_links, list):
-        for link in rtsp_links:
-            get_stream(link)
-    else:
-        get_stream(rtsp_links)
+
+if __name__ == '__main__':
+
+    while True:
+
+        IP, username, password = data_input()
+
+        if IP == '' or username == '' or password =='':
+            print('Пожалуйста, введите IP-адрес, имя пользователя и пароль')
+            IP, username, password = data_input()
+
+        path_to_wsdl = 'venv\Lib\site-packages\wsdl'
+
+        address_list = IP.split(':')     # для проверки введенного IP-адреса: с портом или без
+        rtsp_links = get_links_by_producer(address_list, username, password, path_to_wsdl)
+
+        print('Начинается загрузка...')
+        print('Трансляцию можно прекратить нажатием клавиши Esc')
+
+        if isinstance(rtsp_links, list):
+            for link in rtsp_links:
+                get_stream(link)
+        else:
+            get_stream(rtsp_links)
+
+        if keyboard.read_key() == 'esc': # исполнение программы прерывается с клавиатуры
+            print('Исполнение программы прервано с клавиатуры')
+            break
